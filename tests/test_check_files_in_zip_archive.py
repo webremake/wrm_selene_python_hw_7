@@ -43,27 +43,44 @@ def create_resources_for_tests():
     browser.config.driver = driver  # настраиваем браузер selene на использование созданного драйвера
     browser.config.hold_browser_open = True
 
+    browser.open(PDF_DOWNLOAD_LINK)
+    browser.all('.views-field-title .field-content a').element_by(have.exact_text('LDS-505-FP-10')) \
+        .should(be.clickable).click()
+
+    browser.open(XLSX_DOWNLOAD_LINK)
+    browser.element('[role="button" ][href*="100KB_XLSX"]').should(be.clickable).click()
+
     response = requests.get(CSV_DOWNLOAD_LINK, allow_redirects=True)
-    csv_file_path = join(RESOURCES_DIR, 'csv_test_file.csv')
+    csv_file_path = join(RESOURCES_DIR, CSV_TEST_FILE_NAME)
     with open(csv_file_path, 'wb') as csv_test_file:
         csv_test_file.write(response.content)
 
     # browser.open(PDF_DOWNLOAD_LINK)
     # browser.element('[role=button][href*="100KB_PDF"]').should(be.clickable).click()
 
-    browser.open(XLSX_DOWNLOAD_LINK)
-    browser.element('[role="button" ][href*="100KB_XLSX"]').should(be.clickable).click()
 
-    browser.open(PDF_DOWNLOAD_LINK)
-    browser.all('.views-field-title .field-content a').element_by(have.exact_text('LDS-505-FP-10'))\
-        .should(be.clickable).click()
+
+
 
     yield
-    # удалить все файлы и директорию resources
+    browser.close()
+    browser.quit()
+
+
+
 
 
 def test_check_files_in_zip_archive():
     # проверить что в папке есть нужные файлы
+    files_list = [f for f in os.listdir(RESOURCES_DIR)]
+    downloaded_files_number = len(files_list)
+
+    downloaded_pdf_file_name = "".join([f for f in files_list if f.endswith('.pdf')])
+    downloaded_xlsx_file_name = "".join([f for f in files_list if f.endswith('.xlsx')])
+    # downloaded_csv_file_name = str([f for f in files_list if f.endswith('.csv')])
+
+    ## количество файлов 3
+    ##
 
     # записать в переменные имена файлов
 
@@ -73,4 +90,10 @@ def test_check_files_in_zip_archive():
 
     # проверить файлы по сформированным критериям
 
-    pass
+    # удалить все файлы и директорию resources
+
+
+    os.remove(join(RESOURCES_DIR, CSV_TEST_FILE_NAME))
+    os.remove(join(RESOURCES_DIR, downloaded_pdf_file_name))
+    os.remove(join(RESOURCES_DIR, downloaded_xlsx_file_name))
+    os.rmdir(RESOURCES_DIR)
