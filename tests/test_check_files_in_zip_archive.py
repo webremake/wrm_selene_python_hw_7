@@ -8,12 +8,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
-'''
-надо сделать одну фикстуру
-create_resources_for_tests
-в нее включить скачивание файлов и
-'''
-
 XLSX_DOWNLOAD_LINK = 'https://freetestdata.com/document-files/xlsx/'  # [role="button" ][href*="100KB_XLSX"]
 PDF_DOWNLOAD_LINK = 'https://freetestdata.com/document-files/pdf/'  # [role="button"][href*="100KB_PDF"]
 CSV_DOWNLOAD_LINK = 'https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_200KB_CSV-1.csv'  # [role="button" ][href*="200KB_CSV"]
@@ -24,26 +18,6 @@ RESOURCES_DIR = join(BASE_DIR, 'resources')  # path to save files
 CSV_TEST_FILE_NAME = 'csv_test_file.csv'
 XLSX_TEST_FILE_NAME = 'xlsx_test_file.xlsx'
 PDF_TEST_FILE_NAME = 'pdf_test_file.pdf'
-
-
-# @pytest.fixture(scope='function', autouse=True)
-# def setup_browser_for_files_download():
-#     options = webdriver.ChromeOptions()  # создаем объект options на базе вэбдрайвера Selenium
-#
-#     # dictionary that specify various preferences for the webdriver.
-#     prefs = {
-#         "download.default_directory": RESOURCES_DIR,
-#         "plugins.always_open_pdf_externally": True,
-#         "download.prompt_for_download": False
-#     }
-#     options.add_experimental_option("prefs", prefs)  # передаем в options значения из словаря prefs
-#
-#     # creates a new Chrome webdriver instance with specific options and a service object.
-#     # the resulting driver object can be used to control and automate the Chrome browser
-#     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-#
-#     browser.config.driver = driver  # настраиваем браузер selene на использование созданного драйвера
-#     browser.config.hold_browser_open = True
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -62,7 +36,7 @@ def create_resources_for_tests():
     }
     options.add_experimental_option("prefs", prefs)  # передаем в options значения из словаря prefs
 
-    # creates a new Chrome webdriver instance with specific options and a service object.
+    # create a new Chrome webdriver instance with specific options and a service object.
     # the resulting driver object can be used to control and automate the Chrome browser
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 
