@@ -1,3 +1,4 @@
+import openpyxl
 import pytest
 import requests
 import os
@@ -7,6 +8,8 @@ from selene import browser, be, have
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
+
+from openpyxl import load_workbook
 
 XLSX_DOWNLOAD_LINK = 'https://freetestdata.com/document-files/xlsx/'  # [role="button" ][href*="100KB_XLSX"]
 PDF_DOWNLOAD_LINK = 'https://laserscom.com/ru/products'  # [role="button"][href*="100KB_PDF"]
@@ -82,11 +85,35 @@ def test_check_files_in_zip_archive():
     downloaded_csv_file_size = os.path.getsize(join(RESOURCES_DIR, CSV_TEST_FILE_NAME))
     downloaded_xlsx_file_size = os.path.getsize(join(RESOURCES_DIR, downloaded_xlsx_file_name))
 
-    ##
+    # cоздать для загруженных файлов контрольные данные
+    """
+    Для XLSX:
+    - список листов книги downloaded_xlsx_file_sheet_names
+    - --- название первого листа downloaded_xlsx_file_first_sheet_name
+    - количество столбцов в перовом листе downloaded_xlsx_file_first_sheet_max_col
+    - количество строк в первом листе вownloaded_xlsx_file_first_sheet_max_row
+    - текст первой строки downloaded_xlsx_file_first_row_text
+    - текст последней строки downloaded_xlsx_file_last_row_text
+    """
+    downloaded_xlsx_file = openpyxl.load_workbook(join(RESOURCES_DIR, downloaded_xlsx_file_name))
+    downloaded_xlsx_file_first_sheet = downloaded_xlsx_file.worksheets[0]
 
-    # записать в переменные имена файлов
+    downloaded_xlsx_file_sheet_names = downloaded_xlsx_file.sheetnames
+    downloaded_xlsx_file_first_sheet_max_col = downloaded_xlsx_file_first_sheet.max_column
+    downloaded_xlsx_file_first_sheet_max_row = downloaded_xlsx_file_first_sheet.max_row
+    downloaded_xlsx_file_first_sheet_b2_sell = downloaded_xlsx_file_first_sheet.cell(row = 2, column = 2).value
+    downloaded_xlsx_file_first_sheet_last_sell = downloaded_xlsx_file_first_sheet\
+        .cell(row = downloaded_xlsx_file_first_sheet_max_row, column = downloaded_xlsx_file_first_sheet_max_col).value
 
-    # cоздать для них контрольные данные
+
+    assert downloaded_xlsx_file_sheet_names == ['Sheet1']
+    assert downloaded_xlsx_file_first_sheet_max_col == 6
+    assert downloaded_xlsx_file_first_sheet_max_row == 3083
+    assert downloaded_xlsx_file_first_sheet_b2_sell == 'Dett'
+    assert downloaded_xlsx_file_first_sheet_last_sell == 'Great Britain'
+
+
+
 
     # запаковать файлы в архив
 
