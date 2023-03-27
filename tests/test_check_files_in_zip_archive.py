@@ -92,8 +92,8 @@ def test_check_files_in_zip_archive():
     - --- название первого листа downloaded_xlsx_file_first_sheet_name
     - количество столбцов в перовом листе downloaded_xlsx_file_first_sheet_max_col
     - количество строк в первом листе вownloaded_xlsx_file_first_sheet_max_row
-    - текст первой строки downloaded_xlsx_file_first_row_text
-    - текст последней строки downloaded_xlsx_file_last_row_text
+    - содержимое первой строки первой строки downloaded_xlsx_file_first_sheet_first_row_value
+    - содержимое последнего столбца downloaded_xlsx_file_first_sheet_last_column_value
     """
     downloaded_xlsx_file = openpyxl.load_workbook(join(RESOURCES_DIR, downloaded_xlsx_file_name))
     downloaded_xlsx_file_first_sheet = downloaded_xlsx_file.worksheets[0]
@@ -105,12 +105,37 @@ def test_check_files_in_zip_archive():
     downloaded_xlsx_file_first_sheet_last_sell = downloaded_xlsx_file_first_sheet\
         .cell(row = downloaded_xlsx_file_first_sheet_max_row, column = downloaded_xlsx_file_first_sheet_max_col).value
 
+    def get_xlsx_row_values(path, row):
+        wb = openpyxl.load_workbook(path)
+        first_sheet = wb.worksheets[0]
+        row_values = [first_sheet.cell(row=row, column=col).value for col in range(1, first_sheet.max_column + 1)]
+        return row_values
 
+    downloaded_xlsx_file_first_sheet_first_row_value = get_xlsx_row_values(join(RESOURCES_DIR, downloaded_xlsx_file_name), 1)
+
+    def get_xlsx_column_values(path, column):
+        wb = openpyxl.load_workbook(path)
+        first_sheet = wb.worksheets[0]
+        column_values = [first_sheet.cell(column=column, row=r).value for r in
+                         range(1, first_sheet.max_row + 1)]
+        return column_values
+
+    downloaded_xlsx_file_first_sheet_last_column_value = get_xlsx_column_values\
+        (join(RESOURCES_DIR, downloaded_xlsx_file_name), downloaded_xlsx_file_first_sheet_max_col)
+
+    # TODO downloaded_xlsx_file_name ==
     assert downloaded_xlsx_file_sheet_names == ['Sheet1']
     assert downloaded_xlsx_file_first_sheet_max_col == 6
     assert downloaded_xlsx_file_first_sheet_max_row == 3083
-    assert downloaded_xlsx_file_first_sheet_b2_sell == 'Dett'
-    assert downloaded_xlsx_file_first_sheet_last_sell == 'Great Britain'
+    assert downloaded_xlsx_file_first_sheet_first_row_value == ['SR.', 'NAME', 'GENDER', 'AGE', 'DATE ', 'COUNTRY']
+    # TODO downloaded_xlsx_file_first_sheet_last_column_value ==
+
+
+
+    print(downloaded_xlsx_file_first_sheet_last_column_value)
+
+
+
 
 
 
