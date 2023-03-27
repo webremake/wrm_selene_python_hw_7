@@ -10,6 +10,9 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
 from openpyxl import load_workbook
+from PyPDF2 import PdfReader
+
+
 
 XLSX_DOWNLOAD_LINK = 'https://freetestdata.com/document-files/xlsx/'  # [role="button" ][href*="100KB_XLSX"]
 PDF_DOWNLOAD_LINK = 'https://laserscom.com/ru/products'  # [role="button"][href*="100KB_PDF"]
@@ -123,6 +126,19 @@ def test_check_files_in_zip_archive():
     downloaded_xlsx_file_first_sheet_last_column_value = get_xlsx_column_values\
         (join(RESOURCES_DIR, downloaded_xlsx_file_name), downloaded_xlsx_file_first_sheet_max_col)
 
+    # get control data from pdf files
+    dowloaded_pdf_file_path = join(RESOURCES_DIR, downloaded_pdf_file_name)
+    with open(dowloaded_pdf_file_path, 'rb') as pdf_file:
+        pdf_file_reader = PdfReader(pdf_file)
+        downloaded_pdf_file_number_pages = len(pdf_file_reader.pages)
+        downloaded_pdf_file_first_page_text = pdf_file_reader.pages[0].extract_text()
+        downloaded_pdf_file_last_page_text = pdf_file_reader.pages[downloaded_pdf_file_number_pages - 1].extract_text()
+        downloaded_pdf_file_meta_title = pdf_file_reader.metadata.title
+
+
+
+
+
     # TODO downloaded_xlsx_file_name ==
     assert downloaded_xlsx_file_sheet_names == ['Sheet1']
     assert downloaded_xlsx_file_first_sheet_max_col == 6
@@ -132,7 +148,7 @@ def test_check_files_in_zip_archive():
 
 
 
-    print(downloaded_xlsx_file_first_sheet_last_column_value)
+
 
 
 

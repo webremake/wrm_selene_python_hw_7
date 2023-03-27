@@ -4,3 +4,4 @@ selene >= 2.0.0b17
 webdriver-manager
 requests~=2.28.2
 openpyxl
+PyPDF2
