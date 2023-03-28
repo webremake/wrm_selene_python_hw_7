@@ -1,3 +1,5 @@
+import csv
+
 import openpyxl
 import pytest
 import requests
@@ -105,8 +107,10 @@ def test_check_files_in_zip_archive():
     downloaded_xlsx_file_first_sheet_max_col = downloaded_xlsx_file_first_sheet.max_column
     downloaded_xlsx_file_first_sheet_max_row = downloaded_xlsx_file_first_sheet.max_row
     downloaded_xlsx_file_first_sheet_b2_sell = downloaded_xlsx_file_first_sheet.cell(row = 2, column = 2).value
-    downloaded_xlsx_file_first_sheet_last_sell = downloaded_xlsx_file_first_sheet\
-        .cell(row = downloaded_xlsx_file_first_sheet_max_row, column = downloaded_xlsx_file_first_sheet_max_col).value
+
+    # TODO remove
+    # downloaded_xlsx_file_first_sheet_last_sell = downloaded_xlsx_file_first_sheet\
+    #     .cell(row = downloaded_xlsx_file_first_sheet_max_row, column = downloaded_xlsx_file_first_sheet_max_col).value
 
     def get_xlsx_row_values(path, row):
         wb = openpyxl.load_workbook(path)
@@ -126,7 +130,7 @@ def test_check_files_in_zip_archive():
     downloaded_xlsx_file_first_sheet_last_column_value = get_xlsx_column_values\
         (join(RESOURCES_DIR, downloaded_xlsx_file_name), downloaded_xlsx_file_first_sheet_max_col)
 
-    # get control data from pdf files
+    # get control data from pdf file
     dowloaded_pdf_file_path = join(RESOURCES_DIR, downloaded_pdf_file_name)
     with open(dowloaded_pdf_file_path, 'rb') as pdf_file:
         pdf_file_reader = PdfReader(pdf_file)
@@ -134,6 +138,19 @@ def test_check_files_in_zip_archive():
         downloaded_pdf_file_first_page_text = pdf_file_reader.pages[0].extract_text()
         downloaded_pdf_file_last_page_text = pdf_file_reader.pages[downloaded_pdf_file_number_pages - 1].extract_text()
         downloaded_pdf_file_meta_title = pdf_file_reader.metadata.title
+
+    # get control data from csv file
+    downloaded_csv_file_path = join(RESOURCES_DIR,  CSV_TEST_FILE_NAME)
+    def get_csv_row_value(csv_file_path, row_num):
+        with open(downloaded_csv_file_path, 'rt') as csv_file:
+            csv_file_reader = csv.reader(csv_file)
+            for i, row in enumerate(csv_file_reader):
+                if i == row_num - 1:
+                    row_value = row
+        return row_value
+    downloaded_csv_file_row_3_value = get_csv_row_value(downloaded_csv_file_path, 2)
+    print(downloaded_csv_file_row_3_value)
+
 
 
 
