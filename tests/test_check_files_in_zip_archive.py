@@ -153,13 +153,21 @@ def test_check_files_in_zip_archive():
     print(downloaded_csv_file_row_3_value)
 
     # column value
-    with open('D:\\PycharmProjects\\qa_guru_courses\\file_examples\\csv_test_file.csv', 'rt') as csv_file:
-        csv_file_reader = csv.DictReader(csv_file)
-        col_value = []
-        for row in csv_file_reader:
-            if row['COUNTRY'] != '':
-                col_value.append(row['NAME'])
-        print(col_value)
+    def get_csv_col_value(csv_file_path, col_name):
+        with open(csv_file_path, 'rt') as csv_file:
+            csv_file_reader = csv.DictReader(csv_file)
+            col_value = []
+            for row in csv_file_reader:
+                if row['COUNTRY'] != '':
+                    col_value.append(row[col_name])
+        return col_value
+
+    downloaded_csv_file_col_name_value = get_csv_col_value(downloaded_csv_file_path, 'NAME')
+
+    print(downloaded_csv_file_col_name_value)
+
+
+
 
 
 
