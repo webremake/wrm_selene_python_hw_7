@@ -1,4 +1,5 @@
 import csv
+import zipfile
 
 import openpyxl
 import pytest
@@ -14,6 +15,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from openpyxl import load_workbook
 from PyPDF2 import PdfReader
 
+from zipfile import ZipFile
+
 
 
 XLSX_DOWNLOAD_LINK = 'https://freetestdata.com/document-files/xlsx/'  # [role="button" ][href*="100KB_XLSX"]
@@ -24,6 +27,7 @@ BASE_DIR = dirname(dirname(abspath(__file__)))  # path to project root directory
 RESOURCES_DIR = join(BASE_DIR, 'resources')  # path to save files
 
 CSV_TEST_FILE_NAME = 'csv_test_file.csv'
+ZIP_FILE_NAME =     'archive.zip'
 # XLSX_TEST_FILE_NAME = 'xlsx_test_file.xlsx'
 # PDF_TEST_FILE_NAME = 'pdf_test_file.pdf'
 
@@ -100,6 +104,7 @@ def test_check_files_in_zip_archive():
     - содержимое первой строки первой строки downloaded_xlsx_file_first_sheet_first_row_value
     - содержимое последнего столбца downloaded_xlsx_file_first_sheet_last_column_value
     """
+    downloaded_xlsx_file_path = join(RESOURCES_DIR, downloaded_xlsx_file_name)
     downloaded_xlsx_file = openpyxl.load_workbook(join(RESOURCES_DIR, downloaded_xlsx_file_name))
     downloaded_xlsx_file_first_sheet = downloaded_xlsx_file.worksheets[0]
 
@@ -131,8 +136,8 @@ def test_check_files_in_zip_archive():
         (join(RESOURCES_DIR, downloaded_xlsx_file_name), downloaded_xlsx_file_first_sheet_max_col)
 
     # get control data from pdf file
-    dowloaded_pdf_file_path = join(RESOURCES_DIR, downloaded_pdf_file_name)
-    with open(dowloaded_pdf_file_path, 'rb') as pdf_file:
+    downloaded_pdf_file_path = join(RESOURCES_DIR, downloaded_pdf_file_name)
+    with open(downloaded_pdf_file_path, 'rb') as pdf_file:
         pdf_file_reader = PdfReader(pdf_file)
         downloaded_pdf_file_number_pages = len(pdf_file_reader.pages)
         downloaded_pdf_file_first_page_text = pdf_file_reader.pages[0].extract_text()
@@ -165,6 +170,16 @@ def test_check_files_in_zip_archive():
     downloaded_csv_file_col_name_value = get_csv_col_value(downloaded_csv_file_path, 'NAME')
 
     print(downloaded_csv_file_col_name_value)
+
+    # zip downloaded files to archive.zip file in resouces directory
+    zip_file_path = join(RESOURCES_DIR, ZIP_FILE_NAME)
+    zip_files_list = [downloaded_csv_file_path, downloaded_pdf_file_path, downloaded_xlsx_file_path]
+    with zipfile.ZipFile(zip_file_path, mode='w') as zip_file:
+        for file in zip_files_list:
+            zip_file.write(file)
+
+    # get check data for zip file
+
 
 
 
