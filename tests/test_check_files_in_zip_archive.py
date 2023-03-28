@@ -140,6 +140,7 @@ def test_check_files_in_zip_archive():
         downloaded_pdf_file_meta_title = pdf_file_reader.metadata.title
 
     # get control data from csv file
+    # row value
     downloaded_csv_file_path = join(RESOURCES_DIR,  CSV_TEST_FILE_NAME)
     def get_csv_row_value(csv_file_path, row_num):
         with open(downloaded_csv_file_path, 'rt') as csv_file:
@@ -150,6 +151,17 @@ def test_check_files_in_zip_archive():
         return row_value
     downloaded_csv_file_row_3_value = get_csv_row_value(downloaded_csv_file_path, 2)
     print(downloaded_csv_file_row_3_value)
+
+    # column value
+    with open('D:\\PycharmProjects\\qa_guru_courses\\file_examples\\csv_test_file.csv', 'rt') as csv_file:
+        csv_file_reader = csv.DictReader(csv_file)
+        col_value = []
+        for row in csv_file_reader:
+            if row['COUNTRY'] != '':
+                col_value.append(row['NAME'])
+        print(col_value)
+
+
 
 
 
