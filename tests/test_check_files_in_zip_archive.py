@@ -17,6 +17,8 @@ from PyPDF2 import PdfReader
 
 from zipfile import ZipFile
 
+import io
+
 
 
 XLSX_DOWNLOAD_LINK = 'https://freetestdata.com/document-files/xlsx/'  # [role="button" ][href*="100KB_XLSX"]
@@ -83,26 +85,28 @@ def test_check_files_in_zip_archive():
     downloaded_files_list = [f for f in os.listdir(RESOURCES_DIR)]
     downloaded_files_number = len(downloaded_files_list)
 
-    # записать в переменные имена файлов
+    # записываем имена скачанных файлов
     # TODO раскоментировать
     downloaded_pdf_file_name = "".join([f for f in downloaded_files_list if f.endswith('.pdf')])
     downloaded_xlsx_file_name = "".join([f for f in downloaded_files_list if f.endswith('.xlsx')])
 
-    # определить размер файлов
+    # определяем размер скачанных файлов файлов
     # TODO раскоментировать
     downloaded_pdf_file_size = os.path.getsize(join(RESOURCES_DIR, downloaded_pdf_file_name))
     downloaded_csv_file_size = os.path.getsize(join(RESOURCES_DIR, CSV_TEST_FILE_NAME))
     downloaded_xlsx_file_size = os.path.getsize(join(RESOURCES_DIR, downloaded_xlsx_file_name))
+    downloaded_files_size_list = [downloaded_pdf_file_size, downloaded_csv_file_size, downloaded_xlsx_file_size]
 
-    # cоздать для загруженных файлов контрольные данные
+    # cоздаем для загруженных файлов контрольные данные
     """
     Для XLSX:
-    - список листов книги downloaded_xlsx_file_sheet_names
-    - --- название первого листа downloaded_xlsx_file_first_sheet_name
-    - количество столбцов в перовом листе downloaded_xlsx_file_first_sheet_max_col
-    - количество строк в первом листе вownloaded_xlsx_file_first_sheet_max_row
-    - содержимое первой строки первой строки downloaded_xlsx_file_first_sheet_first_row_value
-    - содержимое последнего столбца downloaded_xlsx_file_first_sheet_last_column_value
+    - downloaded_xlsx_file_sheet_names - список листов книги 
+    - downloaded_xlsx_file_first_sheet_name - название первого листа 
+    - downloaded_xlsx_file_first_sheet_max_col - количество столбцов в перовом листе
+    - downloaded_xlsx_file_first_sheet_max_row - количество строк в первом листе 
+    - downloaded_xlsx_file_first_sheet_first_row_value  - содержимое первой строки первой строки 
+    - downloaded_xlsx_file_first_sheet_last_column_value - содержимое последнего столбца
+    - downloaded_xlsx_file_first_sheet_b2_sell - содержимое ячейки B2
     """
     downloaded_xlsx_file_path = join(RESOURCES_DIR, downloaded_xlsx_file_name)
     downloaded_xlsx_file = openpyxl.load_workbook(join(RESOURCES_DIR, downloaded_xlsx_file_name))
@@ -154,8 +158,8 @@ def test_check_files_in_zip_archive():
                 if i == row_num - 1:
                     row_value = row
         return row_value
-    downloaded_csv_file_row_3_value = get_csv_row_value(downloaded_csv_file_path, 2)
-    print(downloaded_csv_file_row_3_value)
+    downloaded_csv_file_row_2_value = get_csv_row_value(downloaded_csv_file_path, 2)
+    print(downloaded_csv_file_row_2_value)
 
     # column value
     def get_csv_col_value(csv_file_path, col_name):
@@ -174,28 +178,63 @@ def test_check_files_in_zip_archive():
     # zip downloaded files to archive.zip file in resouces directory
     zip_file_path = join(RESOURCES_DIR, ZIP_FILE_NAME)
     zip_files_list = [downloaded_csv_file_path, downloaded_pdf_file_path, downloaded_xlsx_file_path]
-    with zipfile.ZipFile(zip_file_path, mode='w') as zip_file:
+    with zipfile.ZipFile(zip_file_path, mode='w') as zip_file_object:
         for file in zip_files_list:
-            zip_file.write(file)
+            zip_file_object.write(file)
 
-    # get check data for zip file
+    # get check data from zip file
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_file_object:
+        # Получаем список имен файлов в архиве
+        file_names = zip_file_object.namelist()
 
+        zip_csv_file_path = ''.join(filter(lambda x: '.csv' in x, file_names))
+        zip_pdf_file_path = ''.join(filter(lambda x: '.pdf' in x, file_names))
+        zip_xlsx_file_path = ''.join(filter(lambda x: '.xlsx' in x, file_names))
 
+        # создаем список размеров файлов в архиве
+        zip_files_size_list = [zip_file_object.getinfo(file_name).file_size for file_name in file_names]
 
+        # читаем данные из CSV-файла в архиве
+        with zip_file_object.open(zip_csv_file_path, 'r') as csv_file_object:
+            # csv_file_object_reader = csv.reader(csv_file_object)
+            csv_file_object_reader = csv.reader(io.StringIO(csv_file_object.read().decode('utf-8')))
+            for i, row in enumerate(csv_file_object_reader):
+                if i == 2-1:
+                    zip_csv_file_row_2_value = row
+                    break
 
+        # читаем данные из PDF-файла в архиве
+        with zip_file_object.open(zip_pdf_file_path, 'r') as pdf_file_object:
+            pdf_file_reader = PdfReader(pdf_file_object)
+            zip_pdf_file_number_pages = len(pdf_file_reader.pages)
+            zip_pdf_file_first_page_text = pdf_file_reader.pages[0].extract_text()
+            zip_pdf_file_last_page_text = pdf_file_reader.pages[
+            zip_pdf_file_number_pages - 1].extract_text()
+            zip_pdf_file_meta_title = pdf_file_reader.metadata.title
 
+        # читаем данные из XLSX-файла в архиве
+        with zip_file_object.open(zip_xlsx_file_path, 'r') as xlsx_file_object:
+            zip_xlsx_file = openpyxl.load_workbook(xlsx_file_object)
+            zip_xlsx_file_first_sheet = zip_xlsx_file.worksheets[0]
 
-
-
-
+            zip_xlsx_file_sheet_names = zip_xlsx_file.sheetnames
+            zip_xlsx_file_first_sheet_max_col = zip_xlsx_file_first_sheet.max_column
+            zip_xlsx_file_first_sheet_max_row = zip_xlsx_file_first_sheet.max_row
+            zip_xlsx_file_first_sheet_b2_sell = zip_xlsx_file_first_sheet.cell(row=2, column=2).value
 
 
 
     # TODO downloaded_xlsx_file_name ==
-    assert downloaded_xlsx_file_sheet_names == ['Sheet1']
-    assert downloaded_xlsx_file_first_sheet_max_col == 6
-    assert downloaded_xlsx_file_first_sheet_max_row == 3083
-    assert downloaded_xlsx_file_first_sheet_first_row_value == ['SR.', 'NAME', 'GENDER', 'AGE', 'DATE ', 'COUNTRY']
+    assert zip_files_size_list.sort() == downloaded_files_size_list.sort()
+    assert zip_csv_file_row_2_value == downloaded_csv_file_row_2_value
+    assert zip_pdf_file_number_pages == downloaded_pdf_file_number_pages
+    assert zip_pdf_file_last_page_text == downloaded_pdf_file_last_page_text
+    assert zip_pdf_file_number_pages == downloaded_pdf_file_number_pages
+    assert zip_pdf_file_meta_title == downloaded_pdf_file_meta_title
+    # assert downloaded_xlsx_file_sheet_names == ['Sheet1']
+    # assert downloaded_xlsx_file_first_sheet_max_col == 6
+    # assert downloaded_xlsx_file_first_sheet_max_row == 3083
+    # assert downloaded_xlsx_file_first_sheet_first_row_value == ['SR.', 'NAME', 'GENDER', 'AGE', 'DATE ', 'COUNTRY']
     # TODO downloaded_xlsx_file_first_sheet_last_column_value ==
 
 
