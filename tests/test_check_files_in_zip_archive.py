@@ -52,7 +52,7 @@ def create_resources_for_tests():
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 
     browser.config.driver = driver  # настраиваем браузер selene на использование созданного драйвера
-    browser.config.hold_browser_open = True
+    # browser.config.hold_browser_open = True
 
     browser.open(PDF_DOWNLOAD_LINK)
     browser.all('.views-field-title .field-content a').element_by(have.exact_text('LDS-505-FP-10')) \
@@ -68,12 +68,8 @@ def create_resources_for_tests():
         csv_test_file.write(response.content)
 
     yield
-    # TODO раскоментировать
-    # browser.close()
-    # browser.quit()
-
-
-
+    driver.close()
+    driver.quit()
 
 
 def test_check_files_in_zip_archive():
