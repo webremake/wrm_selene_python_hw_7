@@ -20,7 +20,6 @@ from zipfile import ZipFile
 import io
 
 
-
 XLSX_DOWNLOAD_LINK = 'https://freetestdata.com/document-files/xlsx/'  # [role="button" ][href*="100KB_XLSX"]
 PDF_DOWNLOAD_LINK = 'https://laserscom.com/ru/products'  # [role="button"][href*="100KB_PDF"]
 CSV_DOWNLOAD_LINK = 'https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_200KB_CSV-1.csv'  # [role="button" ][href*="200KB_CSV"]
@@ -30,8 +29,6 @@ RESOURCES_DIR = join(BASE_DIR, 'resources')  # path to save files
 
 CSV_TEST_FILE_NAME = 'csv_test_file.csv'
 ZIP_FILE_NAME =     'archive.zip'
-# XLSX_TEST_FILE_NAME = 'xlsx_test_file.xlsx'
-# PDF_TEST_FILE_NAME = 'pdf_test_file.pdf'
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -61,11 +58,10 @@ def create_resources_for_tests():
     browser.all('.views-field-title .field-content a').element_by(have.exact_text('LDS-505-FP-10')) \
          .should(be.clickable).click()
 
-
-    # TODO иногда зависает после окрытия ссылки и не кликает по кнопке
     browser.open(XLSX_DOWNLOAD_LINK)
     browser.element('[role="button" ][href*="100KB_XLSX"]').should(be.clickable).click()
 
+    # скачиваем файл используя библиотеку requesta
     response = requests.get(CSV_DOWNLOAD_LINK, allow_redirects=True)
     csv_file_path = join(RESOURCES_DIR, CSV_TEST_FILE_NAME)
     with open(csv_file_path, 'wb') as csv_test_file:
@@ -81,23 +77,22 @@ def create_resources_for_tests():
 
 
 def test_check_files_in_zip_archive():
-    # определить число скачанных файлов
+    # определяем число скачанных файлов
     downloaded_files_list = [f for f in os.listdir(RESOURCES_DIR)]
     downloaded_files_number = len(downloaded_files_list)
 
-    # записываем имена скачанных файлов
-    # TODO раскоментировать
+    # записываем имена скачанных файлов в переменные
     downloaded_pdf_file_name = "".join([f for f in downloaded_files_list if f.endswith('.pdf')])
     downloaded_xlsx_file_name = "".join([f for f in downloaded_files_list if f.endswith('.xlsx')])
 
     # определяем размер скачанных файлов файлов
-    # TODO раскоментировать
     downloaded_pdf_file_size = os.path.getsize(join(RESOURCES_DIR, downloaded_pdf_file_name))
     downloaded_csv_file_size = os.path.getsize(join(RESOURCES_DIR, CSV_TEST_FILE_NAME))
     downloaded_xlsx_file_size = os.path.getsize(join(RESOURCES_DIR, downloaded_xlsx_file_name))
     downloaded_files_size_list = [downloaded_pdf_file_size, downloaded_csv_file_size, downloaded_xlsx_file_size]
 
     # cоздаем для загруженных файлов контрольные данные
+    # XLSX файл
     """
     Для XLSX:
     - downloaded_xlsx_file_sheet_names - список листов книги 
@@ -117,10 +112,6 @@ def test_check_files_in_zip_archive():
     downloaded_xlsx_file_first_sheet_max_row = downloaded_xlsx_file_first_sheet.max_row
     downloaded_xlsx_file_first_sheet_b2_sell = downloaded_xlsx_file_first_sheet.cell(row = 2, column = 2).value
 
-    # TODO remove
-    # downloaded_xlsx_file_first_sheet_last_sell = downloaded_xlsx_file_first_sheet\
-    #     .cell(row = downloaded_xlsx_file_first_sheet_max_row, column = downloaded_xlsx_file_first_sheet_max_col).value
-
     def get_xlsx_row_values(path, row):
         wb = openpyxl.load_workbook(path)
         first_sheet = wb.worksheets[0]
@@ -139,7 +130,7 @@ def test_check_files_in_zip_archive():
     downloaded_xlsx_file_first_sheet_last_column_value = get_xlsx_column_values\
         (join(RESOURCES_DIR, downloaded_xlsx_file_name), downloaded_xlsx_file_first_sheet_max_col)
 
-    # get control data from pdf file
+    # PDF файл
     downloaded_pdf_file_path = join(RESOURCES_DIR, downloaded_pdf_file_name)
     with open(downloaded_pdf_file_path, 'rb') as pdf_file:
         pdf_file_reader = PdfReader(pdf_file)
@@ -148,9 +139,9 @@ def test_check_files_in_zip_archive():
         downloaded_pdf_file_last_page_text = pdf_file_reader.pages[downloaded_pdf_file_number_pages - 1].extract_text()
         downloaded_pdf_file_meta_title = pdf_file_reader.metadata.title
 
-    # get control data from csv file
-    # row value
+    # CSV файл
     downloaded_csv_file_path = join(RESOURCES_DIR,  CSV_TEST_FILE_NAME)
+
     def get_csv_row_value(csv_file_path, row_num):
         with open(downloaded_csv_file_path, 'rt') as csv_file:
             csv_file_reader = csv.reader(csv_file)
@@ -159,9 +150,7 @@ def test_check_files_in_zip_archive():
                     row_value = row
         return row_value
     downloaded_csv_file_row_2_value = get_csv_row_value(downloaded_csv_file_path, 2)
-    print(downloaded_csv_file_row_2_value)
 
-    # column value
     def get_csv_col_value(csv_file_path, col_name):
         with open(csv_file_path, 'rt') as csv_file:
             csv_file_reader = csv.DictReader(csv_file)
@@ -172,8 +161,6 @@ def test_check_files_in_zip_archive():
         return col_value
 
     downloaded_csv_file_col_name_value = get_csv_col_value(downloaded_csv_file_path, 'NAME')
-
-    print(downloaded_csv_file_col_name_value)
 
     # zip downloaded files to archive.zip file in resouces directory
     zip_file_path = join(RESOURCES_DIR, ZIP_FILE_NAME)
@@ -222,36 +209,16 @@ def test_check_files_in_zip_archive():
             zip_xlsx_file_first_sheet_max_row = zip_xlsx_file_first_sheet.max_row
             zip_xlsx_file_first_sheet_b2_sell = zip_xlsx_file_first_sheet.cell(row=2, column=2).value
 
-
-
-    # TODO downloaded_xlsx_file_name ==
     assert zip_files_size_list.sort() == downloaded_files_size_list.sort()
+
     assert zip_csv_file_row_2_value == downloaded_csv_file_row_2_value
+
     assert zip_pdf_file_number_pages == downloaded_pdf_file_number_pages
     assert zip_pdf_file_last_page_text == downloaded_pdf_file_last_page_text
     assert zip_pdf_file_number_pages == downloaded_pdf_file_number_pages
     assert zip_pdf_file_meta_title == downloaded_pdf_file_meta_title
-    # assert downloaded_xlsx_file_sheet_names == ['Sheet1']
-    # assert downloaded_xlsx_file_first_sheet_max_col == 6
-    # assert downloaded_xlsx_file_first_sheet_max_row == 3083
-    # assert downloaded_xlsx_file_first_sheet_first_row_value == ['SR.', 'NAME', 'GENDER', 'AGE', 'DATE ', 'COUNTRY']
-    # TODO downloaded_xlsx_file_first_sheet_last_column_value ==
 
 
-
-
-
-
-
-
-
-
-
-    # запаковать файлы в архив
-
-    # проверить файлы по сформированным критериям
-
-    # удалить все файлы и директорию resources
 
 
     # os.remove(join(RESOURCES_DIR, CSV_TEST_FILE_NAME))
