@@ -218,6 +218,11 @@ def test_check_files_in_zip_archive():
     assert zip_pdf_file_number_pages == downloaded_pdf_file_number_pages
     assert zip_pdf_file_meta_title == downloaded_pdf_file_meta_title
 
+    assert zip_xlsx_file_sheet_names == downloaded_xlsx_file_sheet_names
+    assert zip_xlsx_file_first_sheet_max_col == downloaded_xlsx_file_first_sheet_max_col
+    assert zip_xlsx_file_first_sheet_max_row == downloaded_xlsx_file_first_sheet_max_row
+    assert zip_xlsx_file_first_sheet_b2_sell == downloaded_xlsx_file_first_sheet_b2_sell
+
 
 
 
