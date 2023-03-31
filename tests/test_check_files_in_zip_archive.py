@@ -220,9 +220,8 @@ def test_check_files_in_zip_archive():
     assert zip_xlsx_file_first_sheet_b2_sell == downloaded_xlsx_file_first_sheet_b2_sell
 
 
-
-
-    # os.remove(join(RESOURCES_DIR, CSV_TEST_FILE_NAME))
-    # os.remove(join(RESOURCES_DIR, downloaded_pdf_file_name))
-    # os.remove(join(RESOURCES_DIR, downloaded_xlsx_file_name))
-    # os.rmdir(RESOURCES_DIR)
+    os.remove(join(RESOURCES_DIR, CSV_TEST_FILE_NAME))
+    os.remove(join(RESOURCES_DIR, downloaded_pdf_file_name))
+    os.remove(join(RESOURCES_DIR, downloaded_xlsx_file_name))
+    os.remove(join(RESOURCES_DIR, ZIP_FILE_NAME))
+    os.rmdir(RESOURCES_DIR)
